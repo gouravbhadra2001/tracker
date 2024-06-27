@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Delivery Boy</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+</head>
+<body>
+    <div id="map" style="height: 500px; width: 100%;"></div>
+
+    <script>
+        // Initialize the map
+        const map = L.map('map').setView([51.505, -0.09], 13);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Add a marker for the delivery boy
+        const marker = L.marker([51.505, -0.09]).addTo(map);
+
+        // Simulate changing location
+        let lat = 51.505;
+        let lng = -0.09;
+
+        function updateLocation() {
+            lat += 0.00001;
+            lng += 0.00001;
+            const position = [lat, lng];
+
+            marker.setLatLng(position);
+            map.panTo(position);
+
+            // Reverse geocoding to get the address
+            $.getJSON(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`, function(data) {
+                const address = data.display_name || "Unknown location";
+                marker.bindPopup(`Delivery Boy<br>${address}`).openPopup();
+            }).fail(function(jqxhr, textStatus, error) {
+                console.error('Error:', textStatus, error);
+                marker.bindPopup(`Delivery Boy<br>Unable to fetch address`).openPopup();
+            });
+        }
+
+        // Update location every second
+        setInterval(updateLocation, 1000);
+    </script>
+</body>
+</html>
